@@ -49,9 +49,14 @@ Each pushbutton is a folder: `TecTools.tab\<Panel>.panel\<Name>.pushbutton\scrip
 - `Families.panel/Category Changer` - batch re-categorizes one or more loaded families
   (Revit's own UI only does this one family at a time, in the Family Editor). Opens each picked
   family via `EditFamily`, sets `OwnerFamily.FamilyCategory`, reloads it back into the project
-  with an overwrite `IFamilyLoadOptions`. Rebuilt from scratch (no surviving spec/source from the
-  old extension folder for this specific tool - the original "Family Material Clean" button,
-  which is a *different* tool, is documented in memory but this one wasn't).
+  with an overwrite `IFamilyLoadOptions`. Rebuilt from scratch - no surviving spec/source from the
+  old extension folder for this specific tool.
+- `Families.panel/Family Material Clean` - resets materials hard-set on a family's geometry
+  (forms/extrusions/sweeps) back to `<By Category>`, recursing into nested loadable subfamilies
+  first. Skips read-only params and materials driven by a family parameter (parametric, left
+  alone on purpose). No source file survived the old extension folder's wipe either, but its
+  spec (BuiltInParameter, guard conditions, recursion into nested families) was recovered from an
+  archived Claude Code session transcript and rebuilt to match.
 
 More tools get added here one at a time as they're rebuilt or requested - see this project's
 Claude Code memory store for specs recovered from the previous, wiped extension folder.
