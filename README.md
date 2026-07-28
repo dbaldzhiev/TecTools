@@ -44,7 +44,14 @@ Each pushbutton is a folder: `TecTools.tab\<Panel>.panel\<Name>.pushbutton\scrip
 
 ## Status
 
-Currently just a smoke-test "About" button proving the extension loads correctly from outside
-AppData. Real tools (family-editing helpers, room-renumbering engine, etc.) get added here one
-at a time as they're rebuilt - see this project's Claude Code memory store for specs recovered
-from the previous, wiped extension folder.
+- `Info.panel/About` - smoke-test button proving the extension loads correctly from outside
+  AppData.
+- `Families.panel/Category Changer` - batch re-categorizes one or more loaded families
+  (Revit's own UI only does this one family at a time, in the Family Editor). Opens each picked
+  family via `EditFamily`, sets `OwnerFamily.FamilyCategory`, reloads it back into the project
+  with an overwrite `IFamilyLoadOptions`. Rebuilt from scratch (no surviving spec/source from the
+  old extension folder for this specific tool - the original "Family Material Clean" button,
+  which is a *different* tool, is documented in memory but this one wasn't).
+
+More tools get added here one at a time as they're rebuilt or requested - see this project's
+Claude Code memory store for specs recovered from the previous, wiped extension folder.
