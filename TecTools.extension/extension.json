@@ -1,0 +1,5 @@
+{
+    "name": "TecTools",
+    "description": "General-purpose personal pyRevit tooling. Not project-specific - reusable ribbon buttons and Revit API helpers built while working on various projects. Registered with pyRevit via a custom extension search path (pyrevit extensions paths add), not installed under %APPDATA%\\pyRevit\\Extensions, so it stays its own independent git repo.",
+    "author": "Dimitar Baldzhiev"
+}
