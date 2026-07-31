@@ -1,0 +1,135 @@
+<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Position Phase Export" Height="760" Width="960"
+    WindowStartupLocation="CenterScreen"
+    ResizeMode="CanResize">
+    <Window.Resources>
+        <Style TargetType="TextBlock" x:Key="Hint">
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="FontStyle" Value="Italic"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="SectionLabel">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,10,0,4"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="150"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Position Phase Export" FontSize="18" FontWeight="Bold"/>
+            <TextBlock x:Name="MasterInfoText" Style="{StaticResource Hint}"
+                       Text="Master: (loading...)"/>
+        </StackPanel>
+
+        <!-- Output naming -->
+        <TextBlock Grid.Row="1" Text="Output" Style="{StaticResource SectionLabel}"/>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="90"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Base name:" VerticalAlignment="Center"/>
+            <TextBox x:Name="BaseNameBox" Grid.Row="0" Grid.Column="1" Margin="4" Padding="3"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Output folder:" VerticalAlignment="Center"/>
+            <TextBox x:Name="FolderBox" Grid.Row="1" Grid.Column="1" Margin="4" Padding="3"/>
+            <Button x:Name="BrowseButton" Grid.Row="1" Grid.Column="2" Content="Browse..." Margin="4"
+                    Click="on_browse_click"/>
+        </Grid>
+
+        <!-- Phase settings -->
+        <TextBlock Grid.Row="3" Text="Phases" Style="{StaticResource SectionLabel}"/>
+        <StackPanel Grid.Row="4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Source phase:" VerticalAlignment="Center"/>
+                <ComboBox x:Name="SourcePhaseCombo" Grid.Column="1" Margin="4" Padding="3"/>
+                <TextBlock Grid.Column="2" Style="{StaticResource Hint}" Margin="8,0,0,0"
+                           Text="The phase everything is currently modelled in. Elements on this phase get moved onto each row's target phase in that row's output only."/>
+            </Grid>
+            <CheckBox x:Name="RemapViewsCheck" Content="Also remap views whose Phase is the source phase onto the target phase"
+                      IsChecked="True" Margin="0,6,0,0"/>
+            <CheckBox x:Name="DeepPurgeCheck" Content="Deep-purge unused elements (families, types, materials, patterns...) to shrink each output"
+                      IsChecked="True" Margin="0,6,0,0"/>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Purging only removes what Revit itself considers to have zero remaining uses (its own Purge Unused, run to a fixpoint). It never touches views, sheets, or schedules - those are left exactly as in the master."/>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Target phases (e.g. 'Phase 1', 'Phase 2'...) must already exist in this document - add them once via Manage tab > Phases before running this tool. Phases cannot be created or renamed through the Revit API."/>
+        </StackPanel>
+
+        <!-- Rows header -->
+        <TextBlock Grid.Row="5" Text="Positions" Style="{StaticResource SectionLabel}"
+                    VerticalAlignment="Top"/>
+
+        <!-- Rows -->
+        <Grid Grid.Row="5" Margin="0,28,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Style="{StaticResource Hint}" Margin="0,0,0,4"
+                       Text="Check the positions to export. Only the checked position's own file keeps that position - every OTHER position listed here (checked or not) is removed from it."/>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="4,0,4,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="On" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" Text="Position" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="2" Text="Suffix" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="3" Text="Output file" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="4" Text="Target phase" FontWeight="Bold"/>
+                </Grid>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="RowsPanel"/>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <!-- Log -->
+        <TextBlock Grid.Row="6" Text="Log" Style="{StaticResource SectionLabel}" VerticalAlignment="Top"/>
+        <TextBox x:Name="LogBox" Grid.Row="6" Margin="0,24,0,0" IsReadOnly="True"
+                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                 TextWrapping="NoWrap" FontFamily="Consolas" FontSize="11" Background="#F5F5F5"/>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="RefreshButton" Content="Refresh Preview" Width="130" Margin="4" Padding="4"
+                    Click="on_refresh_click"/>
+            <Button x:Name="RunButton" Content="Run Export" Width="130" Margin="4" Padding="4"
+                    Click="on_run_click"/>
+            <Button x:Name="CloseButton" Content="Close" Width="90" Margin="4" Padding="4"
+                    Click="on_close_click"/>
+        </StackPanel>
+    </Grid>
+</Window>

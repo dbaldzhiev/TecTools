@@ -1,0 +1,159 @@
+<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="SHEVS Calculator" Height="860" Width="1080"
+    WindowStartupLocation="CenterScreen"
+    ResizeMode="CanResize">
+    <Window.Resources>
+        <Style TargetType="TextBlock" x:Key="Hint">
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="FontStyle" Value="Italic"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="SectionLabel">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,10,0,4"/>
+        </Style>
+        <!-- Column headers are rotated -90 (read bottom-to-top) so narrow
+             columns don't need to be as wide as the label text is long -
+             the label's rendered length becomes the header ROW's height
+             instead of the column's width. -->
+        <Style TargetType="TextBlock" x:Key="ColHeader">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="Margin" Value="2,2,2,4"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <RotateTransform Angle="-90"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Button" x:Key="SortColHeader">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Padding" Value="2,2,2,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="ToolTip" Value="Click to sort by this column; click again to reverse"/>
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <RotateTransform Angle="-90"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="140"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="SHEVS Calculator" FontSize="18" FontWeight="Bold"/>
+            <TextBlock x:Name="ModelInfoText" Style="{StaticResource Hint}"
+                       Text="Model: (loading...)"/>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Pick a reference/purpose (click the dropdown, then type the ref code e.g. '2.26' or the start of the purpose name to jump), choose an exhaust method (natural / forced / none - all three shown and written in Bulgarian, matching what's stored), smoke-free-zone %, and sprinklered. Everything else recomputes live. CompartmentHeight always reflects the Space's own geometry - it is not editable here."/>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Hatches: with Auto checked, it's filled in for you as ceil(Aa req. m2 / Max Aa per hatch) - drag a row's own slider, or use the master slider below to set every row at once. Uncheck a row's Auto to type its hatch count by hand instead. Click anywhere in a row to select that Space and zoom/switch the active view to it."/>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Num and Name are editable - rename/renumber a Space directly here; changes are written on Apply along with everything else. Note Spaces don't seem to reject a duplicate Number the way Rooms do, so no uniqueness warning is shown - double check for accidental duplicates yourself. Click the Num or Name column header to sort by it (naturally - '2' before '10' before '10.1' before '11'); click again to reverse. Use Renumber Sequentially below to fill Num in the current sort order."/>
+        </StackPanel>
+
+        <!-- Column headers -->
+        <ScrollViewer x:Name="HeaderScroll" Grid.Row="1" HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Disabled" Margin="0,4,0,0">
+            <Grid x:Name="HeaderGrid" Height="130">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="45"/>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition Width="240"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition Width="45"/>
+                    <ColumnDefinition Width="45"/>
+                    <ColumnDefinition Width="45"/>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="65"/>
+                    <ColumnDefinition Width="65"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition Width="220"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="NumHeaderButton" Grid.Column="0" Content="Num" Style="{StaticResource SortColHeader}"
+                        Click="on_sort_by_number_click"/>
+                <Button x:Name="NameHeaderButton" Grid.Column="1" Content="Name" Style="{StaticResource SortColHeader}"
+                        Click="on_sort_by_name_click"/>
+                <TextBlock Grid.Column="2" Text="Ref / Purpose" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="3" Text="Q kWh/m2" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="4" Text="Exhaust" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="5" Text="SFZ %" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="6" Text="Sprinkl." Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="7" Text="Hatches" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="8" Text="Auto" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="9" Text="Max Aa/hatch m2" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="10" Text="Compart. H (m)" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="11" Text="SFZ Height (m)" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="12" Text="Curtain H (m)" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="13" Text="Max Open. H (m)" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="14" Text="Aa req. %" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="15" Text="Aa req. m2" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="16" Text="Aa/hatch m2" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="17" Text="ACH" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="18" Text="Total exh. m3" Style="{StaticResource ColHeader}"/>
+                <TextBlock Grid.Column="19" Text="Status" Style="{StaticResource ColHeader}"/>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Rows -->
+        <ScrollViewer x:Name="BodyScroll" Grid.Row="2" HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto" Margin="0,2,0,0">
+            <StackPanel x:Name="RowsPanel"/>
+        </ScrollViewer>
+
+        <!-- Log -->
+        <TextBlock Grid.Row="3" Text="Log" Style="{StaticResource SectionLabel}" VerticalAlignment="Top"/>
+        <TextBox x:Name="LogBox" Grid.Row="3" Margin="0,24,0,0" IsReadOnly="True"
+                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                 TextWrapping="NoWrap" FontFamily="Consolas" FontSize="11" Background="#F5F5F5"/>
+
+        <!-- Bulk actions (left) + main actions (right) -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
+            <TextBlock Text="Master Aa/hatch:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <Slider x:Name="MasterHatchSlider" Width="110" Minimum="0.4" Maximum="4.0" Value="1.0"
+                    VerticalAlignment="Center" Margin="2"
+                    ToolTip="Set every row's Max Aa/hatch slider to this value"/>
+            <TextBox x:Name="MasterHatchBox" Width="45" Margin="2" Padding="2" Text="1.00"/>
+            <TextBlock Text="Start #:" VerticalAlignment="Center" Margin="16,0,4,0"/>
+            <TextBox x:Name="RenumberStartBox" Width="45" Margin="2" Padding="2" Text="1"/>
+            <Button x:Name="RenumberButton" Content="Renumber Sequentially" Width="150" Margin="4" Padding="4"
+                    Click="on_renumber_click"
+                    ToolTip="Assign Num 1,2,3... in the grid's current sort order (not saved until Apply)"/>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="RecomputeButton" Content="Recompute All" Width="130" Margin="4" Padding="4"
+                    Click="on_recompute_click"/>
+            <Button x:Name="ApplyButton" Content="Apply to Model" Width="130" Margin="4" Padding="4"
+                    Click="on_apply_click"/>
+            <Button x:Name="CloseButton" Content="Close" Width="90" Margin="4" Padding="4"
+                    Click="on_close_click"/>
+        </StackPanel>
+    </Grid>
+</Window>
